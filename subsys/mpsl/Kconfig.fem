@@ -18,7 +18,7 @@ config MPSL_FEM_GENERIC_TWO_CTRL_PINS_SUPPORT
 config MPSL_FEM
 	bool "Radio front-end module (FEM) support"
 # MPSL FEM is not supported on 53 yet
-	depends on !(SOC_NRF5340_CPUAPP || SOC_NRF5340_CPUNET) && \
+	depends on !(SOC_NRF5340_CPUAPP) && \
 		   (MPSL_FEM_NRF21540_GPIO_SUPPORT || MPSL_FEM_GENERIC_TWO_CTRL_PINS_SUPPORT)
 	default y
 	help
@@ -34,7 +34,9 @@ choice MPSL_FEM_CHOICE
 config MPSL_FEM_NRF21540_GPIO
 	depends on MPSL_FEM_NRF21540_GPIO_SUPPORT
 	select NRFX_GPIOTE
-	select NRFX_PPI
+	select NRFX_PPI if !SOC_NRF5340_CPUNET
+	select NRFX_DPPI if SOC_NRF5340_CPUNET
+
 	bool "nRF21540 front-end module in GPIO mode"
 	help
 	  FEM device is nRF21540 and its control mode is GPIO.
@@ -43,7 +45,9 @@ config MPSL_FEM_NRF21540_GPIO
 config MPSL_FEM_SIMPLE_GPIO
 	depends on MPSL_FEM_GENERIC_TWO_CTRL_PINS_SUPPORT
 	select NRFX_GPIOTE
-	select NRFX_PPI
+	select NRFX_PPI if !SOC_NRF5340_CPUNET
+	select NRFX_DPPI if SOC_NRF5340_CPUNET
+
 	bool "Generic front-end module with two-pin control"
 	help
 	  FEM device has a generic two-pin control interface.

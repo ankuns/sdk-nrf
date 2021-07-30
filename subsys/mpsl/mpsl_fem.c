@@ -206,10 +206,22 @@ static int fem_nrf21540_gpio_configure(void)
 		}
 	};
 
+#if (CONFIG_HAS_HW_NRF_PPIC)
 	err = ppi_channel_alloc(cfg.ppi_channels, ARRAY_SIZE(cfg.ppi_channels));
 	if (err) {
 		return err;
 	}
+#elif (CONFIG_HAS_HW_NRF_DPPIC)
+	err = ppi_channel_alloc(cfg.dppi_channels, ARRAY_SIZE(cfg.dppi_channels));
+	if (err) {
+		return err;
+	}
+	cfg.egu_instance_no = 0U;
+	for (unsigned int i = 0U; i < sizeof(cfg.egu_channels); ++i)
+	{
+		cfg.egu_channels[i] = 4U + i;
+	}
+#endif
 
 #if DT_NODE_HAS_PROP(DT_NODELABEL(nrf_radio_fem), tx_en_gpios)
 	fem_pin_num_correction(&cfg.pa_pin_config.gpio_pin,
