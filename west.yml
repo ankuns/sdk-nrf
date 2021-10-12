@@ -35,6 +35,8 @@ manifest:
       url-base: https://github.com/PelionIoT
     - name: memfault
       url-base: https://github.com/memfault
+    - name: pkwiek
+      url-base: https://github.com/pkwiek
 
   # If not otherwise specified, the projects below should be obtained
   # from the ncs remote.
@@ -54,7 +56,8 @@ manifest:
     # https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/zephyr/guides/modules.html
     - name: zephyr
       repo-path: sdk-zephyr
-      revision: 15be5e615498377e9326cb2eb5819c7c62005299
+      remote: pkwiek
+      revision: int/KRKNWK-8612-sl-timer
       import:
         # In addition to the zephyr repository itself, NCS also
         # imports the contents of zephyr/west.yml at the above
@@ -126,7 +129,7 @@ manifest:
     - name: nrf-802154
       repo-path: sdk-nrf-802154
       path: nrf-802154
-      revision: v1.7.0
+      revision: int/KRKNWK-8612-sl-timer
       groups:
       - nrf-802154
     - name: cjson
