@@ -39,6 +39,8 @@ manifest:
       url-base: https://github.com/pkwiek
     - name: ankuns
       url-base: https://github.com/ankuns
+    - name: jciupis
+      url-base: https://github.com/jciupis
 
   # If not otherwise specified, the projects below should be obtained
   # from the ncs remote.
@@ -58,8 +60,8 @@ manifest:
     # https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/zephyr/guides/modules.html
     - name: zephyr
       repo-path: sdk-zephyr
-      remote: ankuns
-      revision: develop/KRKNWK-11609-fix-evten-issue
+      remote: jciupis
+      revision: int/KRKNWK-8612-sl-timer
       import:
         # In addition to the zephyr repository itself, NCS also
         # imports the contents of zephyr/west.yml at the above
