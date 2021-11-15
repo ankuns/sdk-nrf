@@ -129,7 +129,8 @@ manifest:
     - name: nrf-802154
       repo-path: sdk-nrf-802154
       path: nrf-802154
-      revision: 5216309d0610b838526d5b9c43815603aad2adaa
+      revision: feature/KRKNWK-11920-hunt
+      remote: ankuns
       groups:
       - nrf-802154
     - name: cjson
