@@ -224,14 +224,29 @@ void main(void)
 			NULL, NULL, NULL, K_PRIO_COOP(7), 0, K_NO_WAIT);
 	k_thread_name_set(&tx_thread_data, "HCI rpmsg TX");
 
+	uint32_t last_cycles = k_cycle_get_32();
 	while (1) {
 		struct net_buf *buf;
 
+#if (0)
 		buf = net_buf_get(&rx_queue, K_FOREVER);
 		err = hci_rpmsg_send(buf);
 		if (err) {
 			LOG_ERR("Failed to send (err %d)", err);
 		}
+#else
+		buf = net_buf_get(&rx_queue, K_MSEC(50));
+		if (buf != NULL) {
+			err = hci_rpmsg_send(buf);
+			if (err) {
+				LOG_ERR("Failed to send (err %d)", err);
+			}
+		}
+#endif
+
+		uint32_t now = k_cycle_get_32();
+		__ASSERT_NO_MSG( k_cyc_to_ms_floor32(now - last_cycles) < 500 );
+		last_cycles = now;
 	}
 }
 
