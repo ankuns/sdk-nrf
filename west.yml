@@ -33,6 +33,8 @@ manifest:
       url-base: https://github.com/NordicSemiconductor
     - name: memfault
       url-base: https://github.com/memfault
+    - name: ankuns
+      url-base: https://github.com/ankuns
 
   # If not otherwise specified, the projects below should be obtained
   # from the ncs remote.
@@ -52,7 +54,8 @@ manifest:
     # https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/zephyr/guides/modules.html
     - name: zephyr
       repo-path: sdk-zephyr
-      revision: d9cc0d37bf45a544ccc7bb0df159d470b836724d
+      remote: ankuns
+      revision: KRKNWK-12770_fix1
       import:
         # In addition to the zephyr repository itself, NCS also
         # imports the contents of zephyr/west.yml at the above
@@ -109,7 +112,8 @@ manifest:
     - name: nrfxlib
       repo-path: sdk-nrfxlib
       path: nrfxlib
-      revision: 943bf88606f0df8b705e38182c10a8cf959dba45
+      revision: KRKNWK-12770_fix1
+      remote: ankuns
     - name: trusted-firmware-m
       repo-path: sdk-trusted-firmware-m
       path: modules/tee/tf-m/trusted-firmware-m
