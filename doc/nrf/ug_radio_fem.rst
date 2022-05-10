@@ -244,6 +244,15 @@ The following properties are optional and you can add them to the devicetree nod
    * ``ant-sel-gpios`` - GPIO characteristic of the device that controls the ``ANT_SEL`` signal of nRF21540.
    * ``mode-gpios`` - GPIO characteristic of the device that controls the ``MODE`` signal of nRF21540.
 
+The ``MODE`` signal of nRF21540 switches between two values of PA gain. The pin can either be set to a fixed state on initialization, which results in constant PA gain, or it can be switched in run-time by the protocol drivers to match the transmission power requested by the application.
+
+To enable run-time ``MODE`` pin switching, :kconfig:option:`CONFIG_MPSL_FEM_NRF21540_RUNTIME_PA_GAIN_CONTROL` must be enabled.
+
+.. important::
+   State of the ``MODE`` pin is selected based on the available PA gains and the required transmission power. To achieve reliable performance, :kconfig:option:`CONFIG_MPSL_FEM_NRF21540_TX_GAIN_DB_POUTA` and :kconfig:option:`CONFIG_MPSL_FEM_NRF21540_TX_GAIN_DB_POUTB` must reflect the contents of nRF21540 registers. Their default values match chip production defaults. For details, see `nRF21540 Product Specification`_.
+
+If run-time ``MODE`` pin switching is disabled, PA gain is constant and equal :kconfig:option:`CONFIG_MPSL_FEM_NRF21540_TX_GAIN_DB`.
+
 * Properties that control the timing of interface signals:
 
   * ``tx-en-settle-time-us`` - Minimal time interval between asserting the ``TX_EN`` signal and starting the radio transmission, in microseconds.
