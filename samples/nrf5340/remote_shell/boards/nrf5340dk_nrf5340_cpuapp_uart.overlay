@@ -9,4 +9,20 @@
 		zephyr,shell-ipc = &ipc0;
 		ncs,remote-shell-uart = &uart0;
 	};
+
+	gpio_fwd: nrf-gpio-forwarder {
+		compatible = "nordic,nrf-gpio-forwarder";
+		status = "okay";
+
+		i2c0 {
+			gpios = < &gpio1 2 0>, < &gpio1 3 0 >;
+		};
+
+		my_gpios {
+			gpios = < &gpio0 28 0>, < &gpio0 29 0>, < &gpio0 30 0>, < &gpio0 31 0>,
+					< &gpio0 23 0>, < &gpio0 24 0>, < &gpio0 8 0>, < &gpio0 9 0>;
+		};
+
+	};
+
 };

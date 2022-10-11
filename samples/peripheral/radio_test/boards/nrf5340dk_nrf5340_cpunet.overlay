@@ -3,3 +3,11 @@
 		zephyr,shell-ipc = &ipc0;
 	};
 };
+
+&i2c0 {
+	status = "okay";
+};
+
+&uart0 {
+	status = "disabled";
+};
