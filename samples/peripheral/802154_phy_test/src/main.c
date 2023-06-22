@@ -5,11 +5,15 @@
  */
 #include <zephyr/init.h>
 #include <zephyr/kernel.h>
+#include <zephyr/sys/reboot.h>
 
 #include "rf_proc.h"
 #include "timer_proc.h"
 #include "comm_proc.h"
 #include "periph_proc.h"
+#if defined(CONFIG_APP_RPC)
+#include "app_rpc.h"
+#endif
 
 #include <zephyr/logging/log.h>
 	LOG_MODULE_REGISTER(phy_tt);
@@ -24,7 +28,11 @@
 
 void ptt_do_reset_ext(void)
 {
-	NVIC_SystemReset();
+#if defined(CONFIG_APP_RPC)
+	app_system_reboot();
+#else
+	sys_reboot(SYS_REBOOT_COLD);
+#endif
 }
 
 static int rf_setup(void)
