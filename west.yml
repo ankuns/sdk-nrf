@@ -20,6 +20,8 @@ manifest:
     # NCS repositories are hosted here.
     - name: ncs
       url-base: https://github.com/nrfconnect
+    - name: ankuns
+      url-base: https://github.com/ankuns
     # Third-party repository sources:
     - name: zephyrproject
       url-base: https://github.com/zephyrproject-rtos
@@ -146,7 +148,8 @@ manifest:
     - name: nrfxlib
       repo-path: sdk-nrfxlib
       path: nrfxlib
-      revision: pull/1276/head
+      revision: dev/KRKNWK-18755_prepare_ncs
+      remote: ankuns
     - name: trusted-firmware-m
       repo-path: sdk-trusted-firmware-m
       path: modules/tee/tf-m/trusted-firmware-m
@@ -178,7 +181,8 @@ manifest:
     - name: nrf-802154
       repo-path: sdk-nrf-802154
       path: nrf-802154
-      revision: 62eb9ffddf67f6d33fb6e2134227d60919e89888
+      revision: develop/KRKNWK-18756_align_to_new_fem_api
+      remote: ankuns
       groups:
         - nrf-802154
     - name: dragoon
