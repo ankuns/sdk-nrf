@@ -2174,6 +2174,13 @@ int dtm_test_receive(uint8_t channel)
 	return 0;
 }
 
+int dtm_fem_tx_power_control_set(uint32_t tx_power_control)
+{
+	dtm_inst.fem.tx_power_control = tx_power_control;
+	
+	return 0;
+}
+
 int dtm_test_transmit(uint8_t channel, uint8_t length, enum dtm_packet pkt)
 {
 	uint8_t header_len;

@@ -675,7 +675,7 @@ static uint16_t on_test_tx_cmd(uint8_t chan, uint8_t length, enum dtm_pkt_type t
 	return err ? LE_TEST_STATUS_EVENT_ERROR : LE_TEST_STATUS_EVENT_SUCCESS;
 }
 
-static uint16_t dtm_cmd_put(uint16_t cmd)
+uint16_t dtm_cmd_put(uint16_t cmd)
 {
 	enum dtm_cmd_code cmd_code = (cmd >> 14) & 0x03;
 
