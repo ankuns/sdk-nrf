@@ -12,6 +12,9 @@
 #include <hal/nrf_gpio.h>
 #if IS_ENABLED(CONFIG_HAS_HW_NRF_PPI)
 #include <nrfx_ppi.h>
+#elif defined(CONFIG_SOC_SERIES_NRF54LX)
+#include <helpers/nrfx_flag32_allocator.h>
+#include <soc/interconnect/dppic_ppib/nrfx_interconnect_dppic_ppib.h>
 #elif IS_ENABLED(CONFIG_HAS_HW_NRF_DPPIC)
 #include <nrfx_dppi.h>
 #endif
@@ -23,8 +26,15 @@ int mpsl_fem_utils_ppi_channel_alloc(uint8_t *ppi_channels, size_t size)
 	for (int i = 0; i < size; i++) {
 		IF_ENABLED(CONFIG_HAS_HW_NRF_PPI,
 			(err = nrfx_ppi_channel_alloc(&ppi_channels[i]);));
+#if defined(CONFIG_SOC_SERIES_NRF54LX)
+		/* Allocate DPPI channels within the Radio Power Domain */
+		err = nrfx_flag32_alloc(
+			&(nrfx_interconnect_dppic_get(NRF_APB_INDEX_RADIO)->channels_mask),
+			&ppi_channels[i]);
+#else
 		IF_ENABLED(CONFIG_HAS_HW_NRF_DPPIC,
 			(err = nrfx_dppi_channel_alloc(&ppi_channels[i]);));
+#endif
 		if (err != NRFX_SUCCESS) {
 			return -ENOMEM;
 		}

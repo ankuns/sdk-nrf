@@ -162,6 +162,23 @@ static int fem_nrf2220_configure(void)
 		return err;
 	}
 
+#if defined(CONFIG_SOC_SERIES_NRF54LX)
+	err = mpsl_fem_utils_egu_channel_alloc(cfg.cs_pin_config.egu_channels,
+		ARRAY_SIZE(cfg.cs_pin_config.egu_channels),
+		0);
+
+	if (err) {
+		return err;
+	}
+	err = mpsl_fem_utils_egu_channel_alloc(cfg.md_pin_config.egu_channels,
+		ARRAY_SIZE(cfg.md_pin_config.egu_channels),
+		0);
+
+	if (err) {
+		return err;
+	}
+#endif
+
 	err = mpsl_fem_nrf2220_interface_config_set(&cfg);
 
 	return err;

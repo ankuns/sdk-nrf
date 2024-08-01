@@ -41,6 +41,10 @@
 	.active_high   = true,				\
 
 #if defined(CONFIG_HAS_HW_NRF_DPPIC)
+
+/* TODO: This is a .h file! move this into .c file along with mpsl_fem_utils_egu_channel_alloc. */
+static uint8_t egu_channel_alloc_starting_channel = 5U;
+
 /** @brief Allocates free EGU instance.
  *
  * @param[out]  egu_instance_no  Number of allocated EGU instance.
@@ -76,10 +80,8 @@ static inline int mpsl_fem_utils_egu_channel_alloc(
 		return -ENOMEM;
 	}
 
-	uint8_t starting_channel = 5U;
-
 	for (int i = 0; i < size; i++) {
-		egu_channels[i] = starting_channel + i;
+		egu_channels[i] = egu_channel_alloc_starting_channel++;
 	}
 
 	return 0;
