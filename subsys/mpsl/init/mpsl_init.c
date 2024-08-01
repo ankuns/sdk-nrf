@@ -26,6 +26,10 @@
 #include <pm/mpsl_pm_utils.h>
 #endif
 
+#if defined(CONFIG_SOC_SERIES_NRF54LX) && defined(CONFIG_NRFX_DPPI)
+#include <soc/interconnect/dppic_ppib/nrfx_interconnect_dppic_ppib.h>
+#endif
+
 LOG_MODULE_REGISTER(mpsl_init, CONFIG_MPSL_LOG_LEVEL);
 
 /* The following two constants are used in nrfx_glue.h for marking these PPI
@@ -407,8 +411,24 @@ static int32_t mpsl_lib_init_internal(void)
 	return 0;
 }
 
+static void mark_nrfx_used_resources(void)
+{
+#if defined(CONFIG_SOC_SERIES_NRF54LX) && defined(CONFIG_NRFX_DPPI)
+	nrfx_interconnect_dppic_channels_mark_allocated(NRF_DPPIC10_S,
+		MPSL_RESERVED_PPI_CHANNELS);
+
+	nrfx_interconnect_ppib_channels_mark_allocated(NRF_PPIB11_S,
+		BIT_MASK(1));
+
+	nrfx_interconnect_ppib_channels_mark_allocated(NRF_PPIB21_S,
+		BIT_MASK(1));
+#endif
+}
+
 static int mpsl_lib_init_sys(void)
 {
+	mark_nrfx_used_resources();
+
 	int err = 0;
 
 	err = mpsl_lib_init_internal();

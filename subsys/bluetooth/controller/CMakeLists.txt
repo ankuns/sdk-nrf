@@ -7,6 +7,7 @@
 zephyr_library()
 
 zephyr_library_sources(
+  bt_init.c
   hci_driver.c
   hci_internal.c
 )
