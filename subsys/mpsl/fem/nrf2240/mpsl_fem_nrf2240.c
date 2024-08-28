@@ -186,6 +186,18 @@ static int fem_nrf2240_configure(void)
 		return err;
 	}
 
+#if defined(NRF54L_SERIES)
+	err = mpsl_fem_utils_gpiote_pin_init(&cfg.cs_pin_config);
+	if (err) {
+		return err;
+	}
+
+	err = mpsl_fem_utils_gpiote_pin_init(&cfg.md_pin_config);
+	if (err) {
+		return err;
+	}
+#endif
+
 	err = mpsl_fem_nrf2240_interface_config_set(&cfg);
 
 	return err;
