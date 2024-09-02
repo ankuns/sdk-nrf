@@ -18,7 +18,7 @@
 	};
 };
 
-fem_twi: &arduino_i2c {
+&arduino_i2c {
 	status = "okay";
 	compatible = "nordic,nrf-twim";
 
@@ -26,5 +26,13 @@ fem_twi: &arduino_i2c {
 		compatible = "nordic,nrf2240-fem-twi";
 		status = "okay";
 		reg = <0x30>;
+	};
+
+	/* The PMIC device on the nRF2240EK.
+	 * This node exists just for possibility to set the VBUS input current limit
+	 */
+	nrf2240ek_pmic: pmic@6b {
+		status = "okay";
+		reg = <0x6b>;
 	};
 };

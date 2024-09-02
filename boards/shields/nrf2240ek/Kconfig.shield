@@ -6,3 +6,20 @@
 
 config SHIELD_NRF2240EK
 	def_bool $(shields_list_contains,nrf2240ek)
+
+if SHIELD_NRF2240EK
+
+config SHIELD_NRF2240EK_PMIC_CURRENT_LIMIT_WORKAROUND
+	bool "Enables a workaround for current limit of the PMIC on the nRF2240EK shield."
+	default y
+	help
+	  When objects are placed close to the PCB antenna of the nRF2240EK shield
+	  the supply voltage drops of the nRF2240 were observed. This is caused
+	  by the default current limit of the PMIC which supplies the nRF2240.
+	  As a workaround the current limit of the PMIC is increased.
+
+config SHIELD_NRF2240EK_PMIC_INIT_PRIORITY
+	int "The initialization priority of the PMIC present on the nRF2240EK shield."
+	default 51
+
+endif # SHIELD_NRF2240EK
