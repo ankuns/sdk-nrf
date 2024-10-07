@@ -162,6 +162,16 @@ static int fem_nrf2220_configure(void)
 		return err;
 	}
 
+	err = mpsl_fem_utils_gpiote_pin_init(&cfg.cs_pin_config);
+	if (err) {
+		return err;
+	}
+
+	err = mpsl_fem_utils_gpiote_pin_init(&cfg.md_pin_config);
+	if (err) {
+		return err;
+	}
+
 	err = mpsl_fem_nrf2220_interface_config_set(&cfg);
 
 	return err;

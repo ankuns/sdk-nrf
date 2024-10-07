@@ -102,4 +102,6 @@ int mpsl_fem_utils_ppi_channel_alloc(uint8_t *ppi_channels, size_t size);
  */
 void mpsl_fem_extended_pin_to_mpsl_fem_pin(uint32_t pin_num, mpsl_fem_pin_t *p_fem_pin);
 
+int mpsl_fem_utils_gpiote_pin_init(mpsl_fem_gpiote_pin_config_t *gpiote_pin);
+
 #endif /* MPSL_FEM_UTILS_H__ */
