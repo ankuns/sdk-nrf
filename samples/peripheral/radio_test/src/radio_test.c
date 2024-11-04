@@ -744,12 +744,14 @@ static void radio_mode_set(NRF_RADIO_Type *reg, nrf_radio_mode_t mode)
 {
 	errata_117(mode);
 
+#if defined(NRF53_SERIES)
 	if (mode == NRF_RADIO_MODE_IEEE802154_250KBIT)
 	{
 		*((volatile uint32_t *)0x41008584) = 0x40081B08;
 	} else {
 		*((volatile uint32_t *)0x41008584) = 0x00091B08;
 	}
+#endif
 
 	nrf_radio_mode_set(reg, mode);
 	mltpan_6(mode);
