@@ -6,6 +6,7 @@
 
 #include <mpsl_fem_twi_drv.h>
 #include <zephyr/drivers/i2c.h>
+#include <zephyr/drivers/i2c/i2c_nrfx_twim.h>
 
 
 int32_t mpsl_fem_twi_drv_impl_xfer_read(void *p_instance, uint8_t slave_address,
@@ -22,4 +23,41 @@ int32_t mpsl_fem_twi_drv_impl_xfer_write(void *p_instance, uint8_t slave_address
 	const struct device *dev = (const struct device *)p_instance;
 
 	return i2c_burst_write(dev, slave_address, internal_address, p_data, data_length);
+}
+
+int32_t mpsl_fem_twi_drv_impl_exclusive_access_acquire(void *p_instance)
+{
+	const struct device *dev = (const struct device *)p_instance;
+
+	return i2c_nrfx_twim_exclusive_access_acquire(dev, K_FOREVER);
+}
+
+void mpsl_fem_twi_drv_impl_exclusive_access_release(void *p_instance)
+{
+	const struct device *dev = (const struct device *)p_instance;
+
+	i2c_nrfx_twim_exclusive_access_release(dev);
+}
+
+static void twim_async_transfer_handler(const struct device *dev, int res, void *ctx)
+{
+	void * cb_p_instance = (void*)dev;
+
+	mpsl_fem_twi_async_xfer_write_cb_t cb = (mpsl_fem_twi_async_xfer_write_cb_t)ctx;
+
+	cb(cb_p_instance, res);
+}
+
+int32_t mpsl_fem_twi_drv_impl_xfer_write_async(void * p_instance, uint8_t slave_address, 
+	const uint8_t * p_data, uint8_t data_length, mpsl_fem_twi_async_xfer_write_cb_t p_callback)
+{
+	const struct device *dev = (const struct device *)p_instance;
+
+	struct i2c_msg msg = {
+		.buf = (uint8_t*)p_data,
+		.len = data_length,
+		.flags = I2C_MSG_WRITE | I2C_MSG_STOP
+	};
+
+	return i2c_nrfx_twim_async_transfer_begin(dev, &msg, slave_address, twim_async_transfer_handler, (void*)p_callback);
 }

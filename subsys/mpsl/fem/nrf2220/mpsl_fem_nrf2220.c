@@ -193,4 +193,74 @@ BUILD_ASSERT(CONFIG_MPSL_FEM_INIT_PRIORITY > CONFIG_I2C_INIT_PRIORITY,
 
 SYS_INIT(mpsl_fem_init, POST_KERNEL, CONFIG_MPSL_FEM_INIT_PRIORITY);
 
+#if defined(CONFIG_MPSL_FEM_NRF2220_TEMPERATURE_COMPENSATION)
+
+#include <protocol/mpsl_fem_nrf2220_protocol_api.h>
+
+static K_SEM_DEFINE(fem_temperature_sem, 0, 1);
+static volatile int8_t fem_temperature;
+static K_SEM_DEFINE(fem_temperature_updated_sem, 0, 1);
+
+void fem_temperature_changed(int8_t temperature)
+{
+	fem_temperature = temperature;
+	k_sem_give(&fem_temperature_sem);
+}
+
+static void fem_temperature_update_cb(void)
+{
+	k_sem_give(&fem_temperature_updated_sem);
+}
+
+static void fem_temperature_compensation_thread(void *dummy1, void *dummy2, void *dummy3)
+{
+	ARG_UNUSED(dummy1);
+	ARG_UNUSED(dummy2);
+	ARG_UNUSED(dummy3);
+
+	while (true) {
+		// k_sem_take(&fem_temperature_sem, K_FOREVER);
+		k_msleep(2000);
+
+		printk("mpsl_fem_nrf2220_temperature_changed(%d)", (int)fem_temperature);
+		if (mpsl_fem_nrf2220_temperature_changed(fem_temperature)) {
+			printk("   need update\n");
+			/* Let's have "taken" semaphore that will inform us that the operation on the
+			 * nrf2220 is finished.
+			 */
+			k_sem_take(&fem_temperature_updated_sem, K_NO_WAIT);
+
+			printk("mpsl_fem_nrf2220_temperature_update_request\n");
+			mpsl_fem_nrf2220_temperature_changed_update_request(fem_temperature_update_cb);
+		
+			/* Let's wait until the operation is finished */
+			k_sem_take(&fem_temperature_updated_sem, K_FOREVER);
+
+			printk("   updated\n");
+
+		}
+		else {
+			printk("   nothing to do\n");
+		}
+
+		// Simulate temperature changes
+		if (fem_temperature < 120) {
+			fem_temperature += 5;
+		}
+		else {
+			fem_temperature = -50;
+		}
+	}
+}
+
+#define FEM_TEMPERATURE_COMPENSATION_THREAD_STACK_SIZE 1024
+
+K_THREAD_DEFINE(fem_temp_comp, FEM_TEMPERATURE_COMPENSATION_THREAD_STACK_SIZE,
+		fem_temperature_compensation_thread,
+		NULL, NULL, NULL,
+		K_LOWEST_APPLICATION_THREAD_PRIO,
+		0, 0);
+
+#endif /* CONFIG_MPSL_FEM_NRF2220_TEMPERATURE_COMPENSATION */
+
 #endif /* defined(CONFIG_MPSL_FEM_NRF2220) */

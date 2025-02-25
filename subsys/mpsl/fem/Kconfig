@@ -288,6 +288,12 @@ config MPSL_FEM_USE_TWI_DRV
 	select I2C
 	default y
 
+config MPSL_FEM_NRF2220_TEMPERATURE_COMPENSATION
+	bool "Temperature compensation of the nRF2220 Front-End Module"
+	depends on MPSL_FEM_NRF2220 && MPSL_FEM_NRF2220_TWI_SUPPORT
+	help
+	  This option enables the temperature compensation for the nRF2220 Front-End Module.
+
 config MPSL_FEM_INIT_PRIORITY
 	int "Init priority of the Front-End Module support code"
 	depends on MPSL_FEM
