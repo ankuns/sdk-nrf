@@ -37,7 +37,8 @@ int32_t mpsl_fem_twi_drv_impl_exclusive_access_acquire(void *p_instance);
 
 void mpsl_fem_twi_drv_impl_exclusive_access_release(void *p_instance);
 
-int32_t mpsl_fem_twi_drv_impl_xfer_write_async(void * p_instance, uint8_t slave_address, 
-	const uint8_t * p_data, uint8_t data_length, mpsl_fem_twi_async_xfer_write_cb_t p_callback);
+int32_t mpsl_fem_twi_drv_impl_xfer_write_async(void * p_instance, uint8_t slave_address,
+	const uint8_t * p_data, uint8_t data_length, mpsl_fem_twi_async_xfer_write_cb_t p_callback,
+	void * p_context);
 
 #endif /* MPSL_FEM_TWI_DRV__ */

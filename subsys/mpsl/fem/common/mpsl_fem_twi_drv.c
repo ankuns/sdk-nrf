@@ -39,17 +39,9 @@ void mpsl_fem_twi_drv_impl_exclusive_access_release(void *p_instance)
 	i2c_nrfx_twim_exclusive_access_release(dev);
 }
 
-static void twim_async_transfer_handler(const struct device *dev, int res, void *ctx)
-{
-	void * cb_p_instance = (void*)dev;
-
-	mpsl_fem_twi_async_xfer_write_cb_t cb = (mpsl_fem_twi_async_xfer_write_cb_t)ctx;
-
-	cb(cb_p_instance, res);
-}
-
-int32_t mpsl_fem_twi_drv_impl_xfer_write_async(void * p_instance, uint8_t slave_address, 
-	const uint8_t * p_data, uint8_t data_length, mpsl_fem_twi_async_xfer_write_cb_t p_callback)
+int32_t mpsl_fem_twi_drv_impl_xfer_write_async(void * p_instance, uint8_t slave_address,
+	const uint8_t * p_data, uint8_t data_length, mpsl_fem_twi_async_xfer_write_cb_t p_callback,
+	void * p_context)
 {
 	const struct device *dev = (const struct device *)p_instance;
 
@@ -59,5 +51,6 @@ int32_t mpsl_fem_twi_drv_impl_xfer_write_async(void * p_instance, uint8_t slave_
 		.flags = I2C_MSG_WRITE | I2C_MSG_STOP
 	};
 
-	return i2c_nrfx_twim_async_transfer_begin(dev, &msg, slave_address, twim_async_transfer_handler, (void*)p_callback);
+	return i2c_nrfx_twim_async_transfer_begin(dev, &msg, slave_address,
+		(i2c_nrfx_twim_async_transfer_handler_t)p_callback, p_context);
 }
