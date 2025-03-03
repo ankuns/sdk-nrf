@@ -49,17 +49,3 @@ uint32_t mpsl_fem_twi_drv_impl_xfer_write_async_time_get(void * p_instance, uint
 	return sw_overhead_safety_margin_time_us + 
 		(1U + (1U + 8U + 1U) + (1U + 8U + 1U) * data_length + 2U) * 10;
 }
-
-uint32_t mpsl_fem_twi_drv_impl_irq_priority_get(void *p_instance)
-{
-	const struct device *dev = (const struct device *)p_instance;
-
-	return i2c_nrfx_twim_irq_priority_direct_get(dev);
-}
-
-void mpsl_fem_twi_drv_impl_irq_priority_set(void *p_instance, uint32_t irq_priority)
-{
-	const struct device *dev = (const struct device *)p_instance;
-
-	i2c_nrfx_twim_irq_priority_direct_set(dev, irq_priority);
-}

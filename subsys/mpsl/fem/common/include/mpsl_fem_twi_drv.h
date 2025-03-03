@@ -24,8 +24,6 @@
 		.p_xfer_write = mpsl_fem_twi_drv_impl_xfer_write, \
 		.p_xfer_write_async = mpsl_fem_twi_drv_impl_xfer_write_async, \
 		.p_xfer_write_async_time_get = mpsl_fem_twi_drv_impl_xfer_write_async_time_get, \
-		.p_irq_priority_get = mpsl_fem_twi_drv_impl_irq_priority_get, \
-		.p_irq_priority_set = mpsl_fem_twi_drv_impl_irq_priority_set, \
 	}
 
 int32_t mpsl_fem_twi_drv_impl_xfer_read(void *p_instance, uint8_t slave_address,
@@ -39,9 +37,5 @@ int32_t mpsl_fem_twi_drv_impl_xfer_write_async(void * p_instance, uint8_t slave_
 	void * p_context);
 
 uint32_t mpsl_fem_twi_drv_impl_xfer_write_async_time_get(void * p_instance, uint8_t data_length);
-
-uint32_t mpsl_fem_twi_drv_impl_irq_priority_get(void *p_instance);
-
-void mpsl_fem_twi_drv_impl_irq_priority_set(void *p_instance, uint32_t irq_priority);
 
 #endif /* MPSL_FEM_TWI_DRV__ */
