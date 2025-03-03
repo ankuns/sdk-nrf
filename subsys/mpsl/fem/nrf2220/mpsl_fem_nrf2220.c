@@ -196,6 +196,7 @@ SYS_INIT(mpsl_fem_init, POST_KERNEL, CONFIG_MPSL_FEM_INIT_PRIORITY);
 #if defined(CONFIG_MPSL_FEM_NRF2220_TEMPERATURE_COMPENSATION)
 
 #include <protocol/mpsl_fem_nrf2220_protocol_api.h>
+#include <zephyr/drivers/i2c/i2c_nrfx_twim.h>
 
 static K_SEM_DEFINE(fem_temperature_sem, 0, 1);
 static volatile int8_t fem_temperature;
@@ -207,8 +208,10 @@ void fem_temperature_changed(int8_t temperature)
 	k_sem_give(&fem_temperature_sem);
 }
 
-static void fem_temperature_update_cb(void)
+static void fem_temperature_update_cb(int32_t res)
 {
+	(void)res;
+
 	k_sem_give(&fem_temperature_updated_sem);
 }
 
@@ -218,9 +221,11 @@ static void fem_temperature_compensation_thread(void *dummy1, void *dummy2, void
 	ARG_UNUSED(dummy2);
 	ARG_UNUSED(dummy3);
 
+	static const struct device * i2c_bus_dev = DEVICE_DT_GET(DT_BUS(MPSL_FEM_TWI_IF));
+
 	while (true) {
 		// k_sem_take(&fem_temperature_sem, K_FOREVER);
-		k_msleep(2000);
+		k_msleep(100);
 
 		printk("mpsl_fem_nrf2220_temperature_changed(%d)", (int)fem_temperature);
 		if (mpsl_fem_nrf2220_temperature_changed(fem_temperature)) {
@@ -231,10 +236,17 @@ static void fem_temperature_compensation_thread(void *dummy1, void *dummy2, void
 			k_sem_take(&fem_temperature_updated_sem, K_NO_WAIT);
 
 			printk("mpsl_fem_nrf2220_temperature_update_request\n");
+			
+
+			(void)i2c_nrfx_twim_exclusive_access_acquire(i2c_bus_dev, K_FOREVER);
+
 			mpsl_fem_nrf2220_temperature_changed_update_request(fem_temperature_update_cb);
 		
 			/* Let's wait until the operation is finished */
 			k_sem_take(&fem_temperature_updated_sem, K_FOREVER);
+			
+			i2c_nrfx_twim_exclusive_access_release(i2c_bus_dev);
+
 
 			printk("   updated\n");
 
