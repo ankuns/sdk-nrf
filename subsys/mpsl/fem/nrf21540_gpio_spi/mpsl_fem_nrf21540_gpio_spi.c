@@ -20,6 +20,9 @@
 #include "mpsl_fem_power_model_interface.h"
 #endif
 #include <nrfx_gpiote.h>
+#ifdef NRF54L_SERIES
+#include <hal/nrf_spim.h>
+#endif
 
 #if !defined(CONFIG_PINCTRL)
 #error CONFIG_PINCTRL is required for nRF21540 GPIO SPI driver
@@ -40,8 +43,9 @@
 #define FEM_SPI_PIN_FUNC(node_id, prop, idx) \
 	NRF_GET_FUN(DT_PROP_BY_IDX(node_id, prop, idx)),
 
-static uint32_t fem_nrf21540_spi_configure(mpsl_fem_nrf21540_gpio_spi_interface_config_t *cfg)
+static int fem_nrf21540_spi_configure(mpsl_fem_nrf21540_gpio_spi_interface_config_t *cfg)
 {
+	int err = 0;
 #if DT_NODE_HAS_PROP(MPSL_FEM_SPI_BUS, cs_gpios)
 	uint8_t cs_gpiote_channel;
 	const nrfx_gpiote_t cs_gpiote = NRFX_GPIOTE_INSTANCE(
@@ -63,12 +67,45 @@ static uint32_t fem_nrf21540_spi_configure(mpsl_fem_nrf21540_gpio_spi_interface_
 			},
 			.enable        = true,
 			.active_high   = true,
-			.gpiote_ch_id  = cs_gpiote_channel
+			.gpiote_ch_id  = cs_gpiote_channel,
+#if defined(NRF54L_SERIES)
+			.p_gpiote = cs_gpiote.p_reg,
+#endif
 #else
 			MPSL_FEM_DISABLED_GPIOTE_PIN_CONFIG_INIT
 #endif
 		}
 	};
+
+#ifdef MPSL_FEM_CONFIG_NRF21540_GPIO_SPI_DPPI_SPI_CHANNELS_COUNT
+#if defined(DPPI_PRESENT)
+	NRF_DPPIC_Type * dppic = NULL;
+
+	err = mpsl_fem_utils_dppi_channel_for_periph_alloc((uintptr_t)MPSL_FEM_SPI_REG,
+			&dppic, cfg->spi_config.dppi_channels,
+			ARRAY_SIZE(cfg->spi_config.dppi_channels));
+	if (err != 0) {
+		return err;
+	}
+#if defined(NRF54L_SERIES)
+	cfg->spi_config.p_dppic = dppic;
+	err = mpsl_fem_utils_ppib11_to_peripheral_task_init(
+		nrf_spim_task_address_get(MPSL_FEM_SPI_REG, NRF_SPIM_TASK_START),
+		&cfg->spi_config.ppib_channel_spim_start);
+	if (err != 0) {
+		return err;
+	}
+#endif /* NRF54L_SERIES */
+#endif /* DPPI_PRESENT */
+
+#if DT_NODE_HAS_PROP(MPSL_FEM_SPI_BUS, cs_gpios)
+	err = mpsl_fem_utils_gpiote_pin_init(&cfg->spi_config.cs_pin_config);
+	if (err) {
+		return err;
+	}
+#endif
+
+#endif
 
 	static const uint8_t fem_spi_pin_nums[] = {
 		DT_FOREACH_CHILD_VARGS(
@@ -103,7 +140,7 @@ static uint32_t fem_nrf21540_spi_configure(mpsl_fem_nrf21540_gpio_spi_interface_
 		}
 	}
 
-	return 0;
+	return err;
 }
 
 static int fem_nrf21540_gpio_spi_configure(void)
@@ -172,7 +209,10 @@ static int fem_nrf21540_gpio_spi_configure(void)
 			},
 			.enable        = true,
 			.active_high   = MPSL_FEM_GPIO_POLARITY_GET(tx_en_gpios),
-			.gpiote_ch_id  = txen_gpiote_channel
+			.gpiote_ch_id  = txen_gpiote_channel,
+#if defined(NRF54L_SERIES)
+			.p_gpiote = txen_gpiote.p_reg,
+#endif
 #else
 			MPSL_FEM_DISABLED_GPIOTE_PIN_CONFIG_INIT
 #endif
@@ -186,7 +226,10 @@ static int fem_nrf21540_gpio_spi_configure(void)
 			},
 			.enable        = true,
 			.active_high   = MPSL_FEM_GPIO_POLARITY_GET(rx_en_gpios),
-			.gpiote_ch_id  = rxen_gpiote_channel
+			.gpiote_ch_id  = rxen_gpiote_channel,
+#if defined(NRF54L_SERIES)
+			.p_gpiote = rxen_gpiote.p_reg,
+#endif
 #else
 			MPSL_FEM_DISABLED_GPIOTE_PIN_CONFIG_INIT
 #endif
@@ -200,7 +243,10 @@ static int fem_nrf21540_gpio_spi_configure(void)
 			},
 			.enable        = true,
 			.active_high   = MPSL_FEM_GPIO_POLARITY_GET(pdn_gpios),
-			.gpiote_ch_id  = pdn_gpiote_channel
+			.gpiote_ch_id  = pdn_gpiote_channel,
+#if defined(NRF54L_SERIES)
+			.p_gpiote = pdn_gpiote.p_reg,
+#endif
 #else
 			MPSL_FEM_DISABLED_GPIOTE_PIN_CONFIG_INIT
 #endif
@@ -240,6 +286,27 @@ static int fem_nrf21540_gpio_spi_configure(void)
 	if (err) {
 		return err;
 	}
+
+#if DT_NODE_HAS_PROP(DT_NODELABEL(nrf_radio_fem), tx_en_gpios)
+	err = mpsl_fem_utils_gpiote_pin_init(&cfg.pa_pin_config);
+	if (err) {
+		return err;
+	}
+#endif
+
+#if DT_NODE_HAS_PROP(DT_NODELABEL(nrf_radio_fem), rx_en_gpios)
+	err = mpsl_fem_utils_gpiote_pin_init(&cfg.lna_pin_config);
+	if (err) {
+		return err;
+	}
+#endif
+
+#if DT_NODE_HAS_PROP(DT_NODELABEL(nrf_radio_fem), pdn_gpios)
+	err = mpsl_fem_utils_gpiote_pin_init(&cfg.pdn_pin_config);
+	if (err) {
+		return err;
+	}
+#endif
 
 	BUILD_ASSERT(
 	  (CONFIG_MPSL_FEM_NRF21540_TX_GAIN_DB == CONFIG_MPSL_FEM_NRF21540_TX_GAIN_DB_POUTA) ||

@@ -7,10 +7,15 @@
 #ifndef MPSL_FEM_UTILS_H__
 #define MPSL_FEM_UTILS_H__
 
+#include <zephyr/sys/util.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <errno.h>
 #include <mpsl_fem_config_common.h>
+#include <nrf.h>
+#if IS_ENABLED(CONFIG_HAS_HW_NRF_DPPIC)
+#include "hal/nrf_dppi.h"
+#endif
 
 #define MPSL_FEM_GPIO_POLARITY_GET(dt_property) \
 	((GPIO_ACTIVE_LOW & \
@@ -84,9 +89,37 @@ static inline int mpsl_fem_utils_egu_channel_alloc(
 
 	return 0;
 }
+
+/** @brief Selects DPPIC controller and allocates DPPI channels to be used with given peripheral.
+ *
+ * For SoCs equipped with one DPPIC controller for a core like nRF5340
+ * the only existing DPPIC controller is selected.
+ *
+ * For SoCs equipped with multiple DPPIC controllers for a core like nRF54L Series
+ * this function selects a DPPIC controller appropriate for given peripheral so that
+ * the peripheral can directly subscribe or publish to DPPI channels of the selected DPPIC
+ * controller.
+ *
+ * The allocation of a DPPI channels occurs for the selected DPPIC controller.
+ *
+ *  @param[in]  periph_addr   Address of a peripheral to be used with a DPPIC controller.
+ *  @param[out] dppic         DPPIC controller selected for given peripheral.
+ *  @param[out] dppi_channels Array of allocated DPPI channels on the @p dppic
+ *  @param[in]  size          Number of DPPI channels to allocate.
+ *
+ * @retval 0       Success.
+ * @retval -ENXIO  An appropriate DPPIC controller for given @p periph_addr not found.
+ * @retval -ENOMEM Not enough free DPPI channels on the selected DPPIC controller.
+ */
+int mpsl_fem_utils_dppi_channel_for_periph_alloc(uint32_t periph_addr, NRF_DPPIC_Type * *dppic,
+						 uint8_t *dppi_channels, size_t size);
+
 #endif /* defined(CONFIG_HAS_HW_NRF_DPPIC) */
 
 /** @brief Allocates free (D)PPI channels and stores them in @p ppi_channels.
+ *
+ * For SoCs with multiple DPPIC controllers this function allocates DPPI channels
+ * on the DPPIC controller that can be used in the domain of the RADIO peripheral.
  *
  * @param[out]  ppi_channels  Array of allocated (D)PPI channels.
  * @param[in]   size          Number of channels to allocate.
@@ -101,6 +134,10 @@ int mpsl_fem_utils_ppi_channel_alloc(uint8_t *ppi_channels, size_t size);
  * @param[inout]  p_fem_pin  Pointer to be filled with pin represented as an mpsl_fem_pin_t struct.
  */
 void mpsl_fem_extended_pin_to_mpsl_fem_pin(uint32_t pin_num, mpsl_fem_pin_t *p_fem_pin);
+
+#if defined(NRF54L_SERIES)
+int mpsl_fem_utils_ppib11_to_peripheral_task_init(uint32_t tep, uint8_t *ppib_ch);
+#endif
 
 /** @brief Initializes the gpiote pin according to the configuration.
  *
