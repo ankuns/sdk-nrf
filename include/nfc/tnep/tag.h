@@ -17,9 +17,6 @@
 #include <nfc/tnep/base.h>
 #include <zephyr/kernel.h>
 
-/** NFC TNEP library event count. */
-#define NFC_TNEP_EVENTS_NUMBER 2
-
 /** Maximum Service Waiting Time. */
 #define NFC_TNEP_TAG_MAX_WAIT_TIME 63
 
@@ -199,8 +196,7 @@ int nfc_tnep_tag_tx_msg_buffer_register(uint8_t *tx_buff,
  * @retval 0 If the operation was successful.
  *           Otherwise, a (negative) error code is returned.
  */
-int nfc_tnep_tag_init(struct k_poll_event *events, uint8_t event_cnt,
-		      nfc_payload_set_t payload_set);
+int nfc_tnep_tag_init(nfc_payload_set_t payload_set);
 
 /**
  * @brief Create the Initial TNEP NDEF message.
